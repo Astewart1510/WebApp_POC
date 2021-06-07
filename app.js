@@ -114,7 +114,7 @@ app.get("/register", function(req, res){
 app.get("/register_doctor", function(req, res){
   res.render("register_doctor");
 });
-
+//hello test github pickup
 app.get("/secrets", async (req, res) => {
   if (req.isAuthenticated()) {
     console.log("this is the true group: ",req.user.group)
