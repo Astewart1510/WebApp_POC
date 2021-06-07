@@ -1,20 +1,132 @@
-<%- include('partials/header') %>
+<%- include('partials/header_logged_in') %>
+<style>
+  #partitioned {
+    padding-left: 15px;
+    letter-spacing: 42px;
+    border: 0;
+    background-image: linear-gradient(to left, black 70%, rgba(92, 83, 83, 0) 0%);
+    background-position: bottom;
+    background-size: 50px 1px;
+    background-repeat: repeat-x;
+    background-position-x: 35px;
+    width: 220px;
+    min-width: 220px;
+    background-color: #e9ecef;
+    /* outline: none; */
+  }
 
-<div class="container">
-  <div class="jumbotron centered">
-    <i class="fas fa-key fa-6x"></i>
-    <h1 class="display-3">Secrets</h1>
-    <p class="secret-text">Don't keep your secrets, share them anonymously!</p>
+  #divInner {
+    left: 0;
+    position: sticky;
+  }
 
-    <form action="/submit" method="POST">
+  #divOuter {
+    width: 190px;
+    overflow: hidden;
+    
 
-      <div class="form-group">
-        <input type="text" class="form-control text-center" name="secret" placeholder="What's your secret?">
+  }
+</style>
+<!-- <section class="section_top"> -->
+  <div class="jumbotron centered submit_top">
+    
+    <div class="row">
+      <div class="col-lg-3">
       </div>
-      <button type="submit" class="btn btn-dark">Submit</button>
-    </form>
+      <div class="col-lg-3">
+        <i class="fas fa-key fa-6x"></i>
+        <p></p>
+        <h3 >Submit sensitive file</h3>
+      <form method='POST' action='/submit' enctype="multipart/form-data">
+        <input type='file' name='file' class="form-control">
+        <div class="form-group"></div>
+          <input type="text" class="form-control text-center" name="file_name" placeholder="Rename file">
+          <p></p>
+          <!-- <input type="passcode" class="form-control text-center" name="password_key" placeholder="Type in passcode"> -->
+          <div class="form-group form-inline justify-content-center">
+            <div id="divOuter">
+              <div id="divInner" >
+                <input id="partitioned" type="password" maxlength="4" name="passcode"
+                  oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
+                  onKeyPress="if(this.value.length==4) return false;" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <p></p>
+          </div>
+          <p></p>
+          <input id ='submit-btn' type='submit' class="btn-primary btn-lg">
+          <div class="d-flex align-items-center" id="spinner">
+            <strong>Loading...</strong>
+            <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+          </div>
+        </div>
+        
+      <div class="col-lg-3">
+        <header class="section-header">
+          <p style="text-align: left">File Submission</p>
+          <h3></h3>
+          <p></p>
+        </header>
+      <h5 style="text-align: left">How to submit a medical file: </h5>
+      <p></p>
+      <h5 style="text-align: left">1. SELECT your file </h5>
+      <h5 style="text-align: left">2. RENAME your file (optional)</h5>
+      <h5 style="text-align: left">3. ENTER your unique 4 digit passcode</h5>
 
-
+      </div>
+      <div class="col-lg-3">
+      
+      </div>
+    </div>
   </div>
-</div>
+      
+  <section id="values" class="values">
+
+      <div class="container aos-init aos-animate" data-aos="fade-up">
+      
+        <header class="section-header">
+          <h2>Our Values</h2>
+          <p>Odit est perspiciatis laborum et dicta</p>
+        </header>
+      
+        <div class="row">
+      
+          <div class="col-lg-4">
+            <div class="box aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
+              <img src="assets/img/values-1.png" class="img-fluid" alt="">
+              <h3>Ad cupiditate sed est odio</h3>
+              <p>Eum ad dolor et. Autem aut fugiat debitis voluptatem consequuntur sit. Et veritatis id.</p>
+            </div>
+          </div>
+      
+          <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+              
+              <img src="assets/img/values-2.png" class="img-fluid" alt="">
+              <h3>Voluptatem voluptatum alias</h3>
+              <p>Repudiandae amet nihil natus in distinctio suscipit id. Doloremque ducimus ea sit non.</p>
+            </div>
+          </div>
+      
+          <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="box aos-init aos-animate" data-aos="fade-up" data-aos-delay="600">
+              <img src="assets/img/values-3.png" class="img-fluid" alt="">
+              <h3>Fugit cupiditate alias nobis.</h3>
+              <p>Quam rem vitae est autem molestias explicabo debitis sint. Vero aliquid quidem commodi.</p>
+            </div>
+          </div>
+      
+        </div>
+      
+      </div>
+  </section>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+        $('#submit-btn').on('click', function(event) {
+          $('#spinner').css('visibility', 'visible');
+        });
+  </script>
+<!-- </section> -->
 <%- include('partials/footer') %>

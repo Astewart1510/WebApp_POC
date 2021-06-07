@@ -1,8 +1,19 @@
 <%- include('partials/header') %>
-
+<section class="section_top">
+<div class="jumbotron" style="
+    padding-top: 20px;">
 <div class="container mt-5">
-  <h1>Login</h1>
-
+  <div class="row">
+    <div class="col-md-4">
+      <h1>User Login</h1>
+    </div>
+    <div class="col-md-4">
+      <a href="/login_doctor" class="btn btn-success">
+        <span>Are you a doctor?</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
   <div class="row">
     <div class="col-sm-8">
       <div class="card">
@@ -33,10 +44,14 @@
             Sign In with Google
           </a>
         </div>
+
       </div>
     </div>
 
   </div>
+</div>
+</div>
+</section>
 </div>
 
 <%- include('partials/footer') %>

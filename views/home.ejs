@@ -1,16 +1,85 @@
 <%- include('partials/header') %>
 
 
-<div class="jumbotron centered">
+
+<section id="hero" class="hero d-flex align-items-center">
+
   <div class="container">
-    <i class="fas fa-key fa-6x"></i>
-    <h1 class="display-3">Secrets</h1>
-    <p class="lead">Don't keep your secrets, share them anonymously!</p>
-    <hr>
-    <a class="btn btn-light btn-lg" href="/register" role="button">Register</a>
-    <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
+    <div class="row">
+      <div class="col-lg-6 d-flex flex-column justify-content-center">
+        <h1 data-aos="fade-up">Privacy-preserving storage of sensitive medical documents</h1>
+        <h2 data-aos="fade-up" data-aos-delay="400">Using the latest in privacy-preserving technology, users can store their sensitive health documents online without loss of privacy
+        </h2>
+        <div data-aos="fade-up" data-aos-delay="600">
+          <div class="text-center text-lg-start">
+            <a href="/Register"
+              class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+              <span>Get Started</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="/Login"
+              class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+              <span>Login</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+          <a href="/Login_doctor"
+            class="btn-get-started-doctor scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+            <span>Are you a doctor?</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
+        <i class="fas fa-key fa-9x"></i>
+        <!-- <img src="../css/img/hero-img.png" class="img-fluid" alt=""> -->
+      </div>
+    </div>
+  </div>
+
+</section><!-- End Hero -->
+<div>
+<section id="values" class="values d-flex padding-bottom: 100px">
+
+  <div class="container aos-init aos-animate" data-aos="fade-up">
+
+    <header class="section-header">
+      <h2>Our Values</h2>
+      <p>Odit est perspiciatis laborum et dicta</p>
+    </header>
+
+    <div class="row">
+
+      <div class="col-lg-4">
+        <div class="box aos-init aos-animate" data-aos="fade-up" data-aos-delay="200">
+          <img src="assets/img/values-1.png" class="img-fluid" alt="">
+          <h3>Ad cupiditate sed est odio</h3>
+          <p>Eum ad dolor et. Autem aut fugiat debitis voluptatem consequuntur sit. Et veritatis id.</p>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="box aos-init aos-animate" data-aos="fade-up" data-aos-delay="400">
+
+          <img src="assets/img/values-2.png" class="img-fluid" alt="">
+          <h3>Voluptatem voluptatum alias</h3>
+          <p>Repudiandae amet nihil natus in distinctio suscipit id. Doloremque ducimus ea sit non.</p>
+        </div>
+      </div>
+
+      <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="box aos-init aos-animate" data-aos="fade-up" data-aos-delay="600">
+          <img src="assets/img/values-3.png" class="img-fluid" alt="">
+          <h3>Fugit cupiditate alias nobis.</h3>
+          <p>Quam rem vitae est autem molestias explicabo debitis sint. Vero aliquid quidem commodi.</p>
+        </div>
+      </div>
+
+    </div>
 
   </div>
-</div>
+</section>
+
+
 
 <%- include('partials/footer') %>
