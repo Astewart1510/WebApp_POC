@@ -32,10 +32,15 @@ border-bottom: 1px solid rgb(0, 0, 0);}
   #divOuter {
     width: 190px;
     overflow: hidden;
-    
-
   }
 
+ #check:checked {
+    background-color:green;
+    visibility:visible;
+ }
+  #check {
+    visibility: hidden;
+ }
 </style>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -71,13 +76,13 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                 <br>
                 
                 <div class="tableFixHead" style="height: 270px;overflow: scroll;">
-                    <table class="table-hover" >
-                        <thead >
+                    <table class="table table-hover tableFixHead" >
+                        <thead class="table-light" >
                         <tr>
                             <th scope="col">No.</th>
                             <th scope="col">File Name</th>
                             <th scope="col">Type</th>
-                            <th scope="col">Viewers</th>
+                            <th scope="col">Shared Status</th>
                             <th scope="col">Edit</th>
                             <th scope="col">View</th>
                         </tr>
@@ -95,11 +100,15 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                                     <%=files.type %>
                                 </td>
                                 <td>
-                                    <%=files.viewers.length %>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="check" <% if (files.viewers.length > 0) {%> checked = "checked" <%}%> disabled>
+                                        </div>
+                                     <%=console.log(files.viewers.length)%> 
+                                    <%=console.log(files.file_id)%> 
                                 </td>
                                 
                                 <td><a data-toggle="modal" data-target="#myModal" class="btn btn-sm btn-primary" href="/users/edit/?file=<%=files.file_id%>">Edit</a></td>
-                                <td><a  class="btn btn-sm btn-success" href="/users/view/?file=<%=files.file_id%>&type=<%=files.type%>">View</a></td>
+                                <td><a  class="btn btn-sm btn-success m-0" href="/users/view/?file=<%=files.file_id%>&type=<%=files.type%>">View</a></td>
                             </tr>
                             <% i++; }) %>
                                 <% } else{ %>
@@ -163,6 +172,16 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                 });
             });
         });
+        var oTable = $('table.data-table').DataTable({
+                rowCallback: function (row, data, index) {
+                    if (data[3] > 11.7) {
+                        $(row).find('td:eq(3)').css('color', 'red');
+                    }
+                    if (data[2].toUpperCase() == 'EE') {
+                        $(row).find('td:eq(2)').css('color', 'blue');
+                    }
+                }
+            });
         
     </script>
 

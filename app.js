@@ -161,6 +161,7 @@ app.get("/view", async (req, res) =>{
     var success = req.query.upload;
     console.log(success);
     let files = await myquery.get_owner_files(req.user.id);
+    console.log(files);
     res.render("view",{ userData: files , success: success});
   } else {
     res.redirect("/login");
