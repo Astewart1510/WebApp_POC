@@ -262,18 +262,14 @@ app.get("/users/view/", async (req, res) => {
   if (req.isAuthenticated()) {
     console.log(req.query.file);
     console.log(req.query.type)
-    const passcode = '1234';
 
     const awe = await bcrypt.compare('1234', '$2b$14$HRgSU3OdNjmPhjgqLUntmeiBUo./GOE9R0EOcCB0ekdD22XS3urBe')
     console.log(awe);
  
-    id_test = new mongodb.ObjectID(req.query.file);
-
     let bucket = new mongodb.GridFSBucket(db, {
       bucketName: 'UserFiles' 
-    });
-        
-    let downloadStream = bucket.openDownloadStream(id_test);
+    });  
+    let downloadStream = bucket.openDownloadStream(mongodb.ObjectID(req.query.file));
     const chunks = [];
 
     for await (let chunk of downloadStream) {
@@ -384,11 +380,16 @@ app.post("/login_doctor", function(req, res){
 
 });
 
-app.get("/users/edit/", async (req, res) =>{
+app.post("/users/edit", async (req, res) =>{
   if (req.isAuthenticated()) {
-    console.log(req.query.file);
-    let file = await myquery.get_file(req.query.file);
-    res.render("edit",{ file: file });
+    console.log(req.body);
+    const match = await bcrypt.compare(req.body.passcode, req.user.passcode);
+    if (match) {
+      console.log("yebo, correct pincode and correct user")
+
+    }
+    //let file = await myquery.get_file(req.query.file);
+    //res.render("edit",{ file: file });
   } else {
     res.redirect("/login");
   }
