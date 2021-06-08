@@ -198,7 +198,7 @@ app.post("/submit", async (req, res) => {
             if (match) {
               console.log("correct passcode");
               console.log("password is correct and uploading file")
-              let key = crypto.createHash("sha256").update(req.body.passcode).digest("hex");
+              let key = crypto.createHash("sha256").update(process.env.SERVER_SECRET).digest("hex");
               console.log("original file buffer before anything", req.file.buffer)
               let encrypted_bytes = myencrypt.encrypt_aes(req.file.buffer, key);
      
@@ -280,7 +280,7 @@ app.get("/users/view/", async (req, res) => {
         chunks.push(Buffer.from(chunk));
       }
 
-    let buffer_2 = await decrypt_unseal_file(chunks, passcode)
+    let buffer_2 = await decrypt_unseal_file(chunks, process.env.SERVER_SECRET)
     console.log("this is the final image buffer", buffer_2);
       
     res.contentType(req.query.type);
