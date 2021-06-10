@@ -253,11 +253,30 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-app.get("/otp_modal", async (req, res) => {
+app.post("/user/update", async (req, res) => {
+  if (req.isAuthenticated()) {
+    const user_info = ({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      mobile: req.body.mobile
+    });
+
+    
+    //mongodb update with new information
   
-  console.log(usernames)
+  } else {
+
+    res.redirect("/login");
+
+  }
 
 });
+app.post("/doctor/update", async (req, res) => {
+  
+  console.log(req.body)
+
+});
+
 
 
 app.get("/users/view/", async (req, res) => {
@@ -385,7 +404,7 @@ app.post("/login_doctor", function(req, res){
 
 
 
-app.post("/users/edit", async (req, res) =>{
+app.post("/users/edit_file", async (req, res) =>{
   if (req.isAuthenticated()) {
     console.log(req.body.bookId);
     const match = await bcrypt.compare(req.body.passcode, req.user.passcode);
@@ -400,10 +419,8 @@ app.post("/users/edit", async (req, res) =>{
         let usernames = await myquery.get_all_usernames();
         
         console.log(file)
-        res.render("/edit", { file_info: file, usernames: usernames });
-      }
-      ;
-
+        res.render("edit");
+      };
     }
     //res.render("edit",{ file: file });
   } else {
