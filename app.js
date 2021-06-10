@@ -115,23 +115,23 @@ app.get("/register", function(req, res){
 app.get("/register_doctor", function(req, res){
   res.render("register_doctor");
 });
-//hello test github pickup
+
 app.get("/secrets", async (req, res) => {
   if (req.isAuthenticated()) {
-    console.log("this is the true group: ",req.user.group)
-    let user_data = await decrypt_unseal_PII(req.user.user_data);
-   console.log(user_data);
+    console.log("this is the true group: ", req.user.group)
+    let user = await myquery.get_user(req.user.id)
+    let user_data = await decrypt_unseal_PII(user[0].user_data);
     let files = await myquery.get_owner_files(req.user.id);
 
     if (req.user.group == "doctor") {
       console.log("this oak is a doctor");
         const user_info = ({
-       username: req.user.username,
+       username: user[0].username,
        firstName: user_data.firstName,
        lastName: user_data.lastName,
        mobile: user_data.mobile,
        hospital: user_data.hospital,
-       group: req.user.group
+       group: user[0].group
       })
 
       console.log("userinfo", user_info);
@@ -140,11 +140,11 @@ app.get("/secrets", async (req, res) => {
     } else if (req.user.group == "user") {
       console.log("this oak is a user");
       const user_info = ({
-      username: req.user.username,
+      username: user[0].username,
       firstName: user_data.firstName,
       lastName: user_data.lastName,
       mobile: user_data.mobile,
-      group: req.user.group
+      group: user[0].group
       })
 
       console.log("userinfo", user_info);
@@ -168,7 +168,6 @@ app.get("/view", async (req, res) =>{
     res.redirect("/login");
   }
 });
-
 
 app.get("/submit", function(req, res){
   if (req.isAuthenticated()) {
@@ -261,20 +260,39 @@ app.post("/user/update", async (req, res) => {
       mobile: req.body.mobile
     });
 
-    
-    //mongodb update with new information
-  
+    user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
+
+   User.updateOne({ _id: req.user.id}, {$set: {user_data: user_info_sealed_encrypted_string, username: req.body.username}}, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated");
+   });
+    res.redirect(req.get('referer'));
+
   } else {
-
     res.redirect("/login");
-
   }
 
 });
 app.post("/doctor/update", async (req, res) => {
-  
-  console.log(req.body)
+  if (req.isAuthenticated()) {
+    const user_info = ({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      mobile: req.body.mobile,
+      hospital: req.body.hospital
+    });
 
+    user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
+
+   User.updateOne({ _id: req.user.id}, {$set: {user_data: user_info_sealed_encrypted_string, username: req.body.username}}, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated");
+   });
+    res.redirect(req.get('referer'));
+
+  } else {
+    res.redirect("/login");
+  }
 });
 
 
@@ -402,7 +420,20 @@ app.post("/login_doctor", function(req, res){
 });
 
 
-
+app.post("/testing", async (req, res) =>{
+  if (req.isAuthenticated()) {
+    console.log(req.body.bookId);
+    let match = await bcrypt.compare(req.body.passcode, req.user.passcode);
+    if (match) {
+      console.log("yebo, correct pincode and correct user");
+      let file = await myquery.get_file(req.body.bookId);
+      console.log(file)
+      res.render("edit_file", {file: file});
+    }
+  } else {
+    res.redirect("/login");
+  }
+})
 
 app.post("/users/edit_file", async (req, res) =>{
   if (req.isAuthenticated()) {
@@ -419,10 +450,9 @@ app.post("/users/edit_file", async (req, res) =>{
         let usernames = await myquery.get_all_usernames();
         
         console.log(file)
-        res.render("edit");
+    res.render("edit_file");
       };
     }
-    //res.render("edit",{ file: file });
   } else {
     res.redirect("/login");
   }
