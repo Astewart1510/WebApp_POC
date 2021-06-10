@@ -76,6 +76,7 @@ passport.deserializeUser(function(id, done) {
 let db;
 const { Readable } = require('stream');
 const { stringify } = require('querystring');
+const { createSecureServer } = require('http2');
 
 MongoClient.connect('mongodb://localhost', { useNewUrlParser: true, useUnifiedTopology: true }, (err, database) => {
   if (err) {
@@ -253,7 +254,8 @@ app.post("/submit", async (req, res) => {
 });
 
 app.get("/otp_modal", async (req, res) => {
-  res.render("otp_modal");
+  
+  console.log(usernames)
 
 });
 
@@ -380,15 +382,29 @@ app.post("/login_doctor", function(req, res){
 
 });
 
+
+
+
 app.post("/users/edit", async (req, res) =>{
   if (req.isAuthenticated()) {
-    console.log(req.body);
+    console.log(req.body.bookId);
     const match = await bcrypt.compare(req.body.passcode, req.user.passcode);
     if (match) {
-      console.log("yebo, correct pincode and correct user")
+      console.log("yebo, correct pincode and correct user");
+      let file = await myquery.get_file(req.body.bookId);
+      console.log(file);
+      let file_owner = await myquery.get_owner_one_file(req.user.id, req.body.bookId);
+      if (file_owner == req.user.id) {
+        console.log(file_owner)
+        //get usernames to select
+        let usernames = await myquery.get_all_usernames();
+        
+        console.log(file)
+        res.render("/edit", { file_info: file, usernames: usernames });
+      }
+      ;
 
     }
-    //let file = await myquery.get_file(req.query.file);
     //res.render("edit",{ file: file });
   } else {
     res.redirect("/login");
