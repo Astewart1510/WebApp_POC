@@ -428,7 +428,12 @@ app.post("/testing", async (req, res) =>{
       console.log("yebo, correct pincode and correct user");
       let file = await myquery.get_file(req.body.bookId);
       console.log(file)
-      res.render("edit_file", {file: file});
+      if (file[0].owner == req.user.id) {
+        console.log("yes its the correct owner");
+        let usernames = await myquery.get_all_usernames();
+        res.render("edit_file", {file: file, usernames: usernames});
+      }
+      
     }
   } else {
     res.redirect("/login");
