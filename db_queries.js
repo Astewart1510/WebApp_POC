@@ -87,12 +87,12 @@ async function get_owner_one_file(owner_id, file_id) {
 }
 
 async function get_all_usernames() {
-  let usernames = await User.find({ group: 'user' }, { _id: 0, username: 1 });
-  usernames_ = [];
-  for (i in usernames) {
-    usernames_[i] = usernames[i]["username"]
-  }
-  return usernames_
+  let usernames = await User.find({ group: 'user' }, { username: 1 });
+  // usernames_ = [];
+  // for (i in usernames) {
+  //   usernames_[i] = usernames[i]["username", "_id"]
+  // }
+  return usernames
 }
 
 

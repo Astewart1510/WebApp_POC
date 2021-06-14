@@ -78,7 +78,7 @@ form.is-readonly .btn-cancel {
               <label class="col-sm-3 col-form-label">File ID</label>
               <div class="col-sm-9">
               <input class="col-sm-9 text-secondary is-disabled form-control" type="text" value="<%= file[0].file_id  %>"
-                name="firstName" disabled>
+                name="fileId" disabled>
               </div>
             </div>
             <hr>
@@ -86,16 +86,19 @@ form.is-readonly .btn-cancel {
               <label class="col-sm-3 col-form-label">File Type</label>
               <div class="col-sm-9">
                 <input class="col-sm-9 text-secondary is-disabled form-control" type="text" value="<%= file[0].type  %>"
-                  name="firstName" disabled>
+                  name="fileType" disabled>
               </div>
           </div>
           <hr>
           <div class="form-group row">
             <label class="col-sm-3 col-form-label">File Name</label>
             <div class="col-sm-9">
-              <form action="/user/update" method="POST" class="form-inline is-readonly">
+              <form action="/editFile_name" method="POST" class="form-inline is-readonly">
                 <input class="col-sm-10 text-secondary is-disabled form-control" type="text" value="<%= file[0].name  %>"
-                  name="lastName" disabled>
+                  name="fileName" disabled>
+                  
+                <input type="hidden" value="<%= file[0].file_id %>" name="fileId">
+                  
                 <button type="button" class="btn btn-warning btn-edit js-edit btn-sm ">Change</button>
                 <button type="submit" class="btn btn-success mr-1 btn-save js-save btn-sm">Save</button>
                 <button type="reset" class="btn btn-danger btn-cancel js-cancel btn-sm">Cancel</button>
@@ -158,10 +161,10 @@ form.is-readonly .btn-cancel {
                         <%=i; %>
                       </td>
                       <td>
-                        <%=username%>
+                        <%=username.username%>
                       </td>
                       <td><a class="btn btn-sm btn-success m-0"
-                          href="/users/view/?file=<%=//files.file_id%>&type=<%=//files.type%>">&#10004;</a></td>
+                          href="/editFile/add_viewer?username_id=<%=username.id%>&file_id=<%= file[0].file_id %>">&#10004;</a></td>
                     </tr>
                     <% i++; }) %>
                       <% } else{ %>

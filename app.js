@@ -178,7 +178,179 @@ app.get("/submit", function(req, res){
   }
 });
 
-// post routes
+app.get("/users/view/", async (req, res) => {
+  if (req.isAuthenticated()) {
+    console.log(req.query.file);
+    console.log(req.query.type)
+
+    const awe = await bcrypt.compare('1234', '$2b$14$HRgSU3OdNjmPhjgqLUntmeiBUo./GOE9R0EOcCB0ekdD22XS3urBe')
+    console.log(awe);
+ 
+    let bucket = new mongodb.GridFSBucket(db, {
+      bucketName: 'UserFiles' 
+    });  
+    let downloadStream = bucket.openDownloadStream(mongodb.ObjectID(req.query.file));
+    const chunks = [];
+
+    for await (let chunk of downloadStream) {
+        chunks.push(Buffer.from(chunk));
+      }
+
+    let buffer_2 = await decrypt_unseal_file(chunks, process.env.SERVER_SECRET)
+    console.log("this is the final image buffer", buffer_2);
+      
+    res.contentType(req.query.type);
+    res.send(buffer_2);
+  } else {
+    res.redirect("/login");
+  }
+});
+
+
+////////////// post routes
+
+// register routes
+app.post("/register", async (req, res) => {
+ 
+  const saltRounds = 14;
+  const hashed_password = await bcrypt.hash(req.body.passcode, saltRounds);
+  
+  const user_info = ({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      mobile: req.body.mobile
+    });
+  
+  user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
+
+  User.register({username: req.body.username, user_data: user_info_sealed_encrypted_string, passcode: hashed_password }, req.body.password, function(err, user){
+    if (err) {
+      console.log(err);
+      res.send(err);
+    } else {
+      passport.authenticate("local")(req, res, function(){
+        res.redirect("/secrets");
+      });
+    }
+  });
+});
+
+
+app.post("/register_doctor", async (req, res) =>  {
+  const saltRounds = 14;
+  const hashed_password = await bcrypt.hash(req.body.passcode, saltRounds);
+  
+   const doctor_info = ({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+     mobile: req.body.mobile,
+    hospital: req.body.hospital
+  })
+
+  doctor_info_sealed_encrypted_string = await encrypt_seal_PII(doctor_info);
+
+  User.register({username: req.body.username, user_data: doctor_info_sealed_encrypted_string, group: "doctor" , passcode: hashed_password}, req.body.password, function(err, user){
+    if (err) {
+      console.log(err);
+      res.send(err);
+    } else {
+      passport.authenticate("local")(req, res, function () {
+        console.log("successful registtration of doctor");
+        res.redirect("/secrets");
+      });
+    }
+  });
+
+});
+
+// login routes
+app.post("/login", function(req, res){
+
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  });
+
+  req.login(user, function(err){
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate("local")(req, res, function(){
+        res.redirect("/secrets");
+      });
+    }
+  });
+
+});
+
+app.post("/login_doctor", function(req, res){
+
+  const Doctor = new User({
+    username: req.body.username,
+    password: req.body.password
+  });
+
+  req.login(Doctor, function(err){
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(User);
+      passport.authenticate("local")(req, res, function () {
+        console.log("Successful login of doctor");
+        res.redirect("/secrets");
+      });
+    }
+  });
+
+});
+
+// user profile routes 
+
+app.post("/user/update", async (req, res) => {
+  if (req.isAuthenticated()) {
+    const user_info = ({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      mobile: req.body.mobile
+    });
+
+    user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
+
+   User.updateOne({ _id: req.user.id}, {$set: {user_data: user_info_sealed_encrypted_string, username: req.body.username}}, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated");
+   });
+    res.redirect(req.get('referer'));
+
+  } else {
+    res.redirect("/login");
+  }
+
+});
+
+app.post("/doctor/update", async (req, res) => {
+  if (req.isAuthenticated()) {
+    const user_info = ({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      mobile: req.body.mobile,
+      hospital: req.body.hospital
+    });
+
+    user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
+
+   User.updateOne({ _id: req.user.id}, {$set: {user_data: user_info_sealed_encrypted_string, username: req.body.username}}, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated");
+   });
+    res.redirect(req.get('referer'));
+
+  } else {
+    res.redirect("/login");
+  }
+});
+
+// file routes , submit and edit 
 app.post("/submit", async (req, res) => {
   if (req.isAuthenticated) {
     upload.single('file')(req, res, async (err) => {
@@ -252,175 +424,23 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-app.post("/user/update", async (req, res) => {
-  if (req.isAuthenticated()) {
-    const user_info = ({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      mobile: req.body.mobile
-    });
+app.post("/editFile_name", async (req, res) => {
+    if (req.isAuthenticated()) {
+      console.log(req.body);
+       FileRights.updateOne({ file_id: req.body.fileId}, {$set: {name: req.body.fileName}}, function(err, res) { 
+         if (err) throw err;
+         console.log("1 filename updated");
+       });
+      let newfile = await myquery.get_file(req.body.fileId);
+      let usernames = await myquery.get_all_usernames();
 
-    user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
-
-   User.updateOne({ _id: req.user.id}, {$set: {user_data: user_info_sealed_encrypted_string, username: req.body.username}}, function(err, res) {
-    if (err) throw err;
-    console.log("1 document updated");
-   });
-    res.redirect(req.get('referer'));
-
-  } else {
-    res.redirect("/login");
-  }
-
-});
-app.post("/doctor/update", async (req, res) => {
-  if (req.isAuthenticated()) {
-    const user_info = ({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      mobile: req.body.mobile,
-      hospital: req.body.hospital
-    });
-
-    user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
-
-   User.updateOne({ _id: req.user.id}, {$set: {user_data: user_info_sealed_encrypted_string, username: req.body.username}}, function(err, res) {
-    if (err) throw err;
-    console.log("1 document updated");
-   });
-    res.redirect(req.get('referer'));
-
-  } else {
-    res.redirect("/login");
-  }
-});
-
-
-
-app.get("/users/view/", async (req, res) => {
-  if (req.isAuthenticated()) {
-    console.log(req.query.file);
-    console.log(req.query.type)
-
-    const awe = await bcrypt.compare('1234', '$2b$14$HRgSU3OdNjmPhjgqLUntmeiBUo./GOE9R0EOcCB0ekdD22XS3urBe')
-    console.log(awe);
- 
-    let bucket = new mongodb.GridFSBucket(db, {
-      bucketName: 'UserFiles' 
-    });  
-    let downloadStream = bucket.openDownloadStream(mongodb.ObjectID(req.query.file));
-    const chunks = [];
-
-    for await (let chunk of downloadStream) {
-        chunks.push(Buffer.from(chunk));
-      }
-
-    let buffer_2 = await decrypt_unseal_file(chunks, process.env.SERVER_SECRET)
-    console.log("this is the final image buffer", buffer_2);
-      
-    res.contentType(req.query.type);
-    res.send(buffer_2);
-  } else {
-    res.redirect("/login");
-  }
-});
-
-
-app.post("/register", async (req, res) => {
- 
-  const saltRounds = 14;
-  const hashed_password = await bcrypt.hash(req.body.passcode, saltRounds);
-  
-  const user_info = ({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      mobile: req.body.mobile
-    });
-  
-  user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
-
-  User.register({username: req.body.username, user_data: user_info_sealed_encrypted_string, passcode: hashed_password }, req.body.password, function(err, user){
-    if (err) {
-      console.log(err);
-      res.send(err);
+      res.render("edit_file", {file: newfile, usernames: usernames});
     } else {
-      passport.authenticate("local")(req, res, function(){
-        res.redirect("/secrets");
-      });
+      res.redirect("/login");
     }
-  });
 });
 
-
-app.post("/register_doctor", async (req, res) =>  {
-  const saltRounds = 14;
-  const hashed_password = await bcrypt.hash(req.body.passcode, saltRounds);
-  
-   const doctor_info = ({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-     mobile: req.body.mobile,
-    hospital: req.body.hospital
-  })
-
-  doctor_info_sealed_encrypted_string = await encrypt_seal_PII(doctor_info);
-
-  User.register({username: req.body.username, user_data: doctor_info_sealed_encrypted_string, group: "doctor" , passcode: hashed_password}, req.body.password, function(err, user){
-    if (err) {
-      console.log(err);
-      res.send(err);
-    } else {
-      passport.authenticate("local")(req, res, function () {
-        console.log("successful registtration of doctor");
-        res.redirect("/secrets");
-      });
-    }
-  });
-
-});
-
-app.post("/login", function(req, res){
-
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password
-  });
-
-  req.login(user, function(err){
-    if (err) {
-      console.log(err);
-    } else {
-      passport.authenticate("local")(req, res, function(){
-        res.redirect("/secrets");
-      });
-    }
-  });
-
-});
-
-app.post("/login_doctor", function(req, res){
-
-  const Doctor = new User({
-    username: req.body.username,
-    password: req.body.password
-  });
-
-  req.login(Doctor, function(err){
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(User);
-      passport.authenticate("local")(req, res, function () {
-        console.log("Successful login of doctor");
-        res.redirect("/secrets");
-      });
-    }
-  });
-
-});
-
-
-app.post("/testing", async (req, res) =>{
+app.post("/editFile", async (req, res) =>{
   if (req.isAuthenticated()) {
     console.log(req.body.bookId);
     let match = await bcrypt.compare(req.body.passcode, req.user.passcode);
@@ -433,35 +453,66 @@ app.post("/testing", async (req, res) =>{
         let usernames = await myquery.get_all_usernames();
         res.render("edit_file", {file: file, usernames: usernames});
       }
-      
     }
   } else {
     res.redirect("/login");
   }
 })
 
-app.post("/users/edit_file", async (req, res) =>{
-  if (req.isAuthenticated()) {
-    console.log(req.body.bookId);
-    const match = await bcrypt.compare(req.body.passcode, req.user.passcode);
-    if (match) {
-      console.log("yebo, correct pincode and correct user");
-      let file = await myquery.get_file(req.body.bookId);
-      console.log(file);
-      let file_owner = await myquery.get_owner_one_file(req.user.id, req.body.bookId);
-      if (file_owner == req.user.id) {
-        console.log(file_owner)
-        //get usernames to select
-        let usernames = await myquery.get_all_usernames();
-        
-        console.log(file)
-    res.render("edit_file");
-      };
-    }
-  } else {
-    res.redirect("/login");
-  }
+app.get("/editFile/add_viewer", async (req, res) => {
+   //if (req.isAuthenticated()) {
+     console.log(req.query);
+  let viewer = mongodb.ObjectID(req.query.username_id);
+  console.log(viewer)
+  let newfile = await myquery.get_file(req.query.file_id);
+  let match = newfile[0].viewers.includes(viewer);
+  console.log(match);
+  // for (let i of newfile[0].viewers) {
+  //   if (i != viewer) {
+  //     console.log("this can be added")
+  //   } else {
+  //     console.log("this user already exits")
+  //   }
+  // }
+  console.log(newfile[0].viewers);
+    //let exits = await FileRights.findOne({ file_id: req.query.file_id }, { $where: t })
+    //  let exits = await FileRights.find( { $and: [ { file_id: req.query.file_id }, { viewer: viewer} ] } )
+    //   console.log(exits)
+      //  FileRights.updateOne({ file_id: req.query.file_id}, {$push: {name: viewer}}, function(err, res) { 
+      //    if (err) throw err;
+      //    console.log("1 viewer inserted");
+      //  });
+      // let usernames = await myquery.get_all_usernames();
+
+    //   res.render("edit_file", {file: newfile, usernames: usernames});
+    // } else {
+    //   res.redirect("/login");
+    // }
+  
 });
+
+// app.post("/users/edit_file", async (req, res) =>{
+//   if (req.isAuthenticated()) {
+//     console.log(req.body.bookId);
+//     const match = await bcrypt.compare(req.body.passcode, req.user.passcode);
+//     if (match) {
+//       console.log("yebo, correct pincode and correct user");
+//       let file = await myquery.get_file(req.body.bookId);
+//       console.log(file);
+//       let file_owner = await myquery.get_owner_one_file(req.user.id, req.body.bookId);
+//       if (file_owner == req.user.id) {
+//         console.log(file_owner)
+//         //get usernames to select
+//         let usernames = await myquery.get_all_usernames();
+        
+//         console.log(file)
+//     res.render("edit_file");
+//       };
+//     }
+//   } else {
+//     res.redirect("/login");
+//   }
+// });
 
 // change to post later on
 app.get("/seal_data", function (req, res) {
