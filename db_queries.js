@@ -95,6 +95,20 @@ async function get_all_usernames() {
   return usernames
 }
 
+async function get_current_viewers(viewers) {
+  let viewers_usernames = [];
+  let i = 0;
+  for (const username of viewers) {
+    let user = await User.find({ _id: username }, { username: 1 }); //username: 1, firstName: 1, LastName: 1, mobile: 1, salt: 0, hash: 0,
+    viewers_usernames.push(user);
+  }
+  usernames_ = [];
+  for (i in viewers_usernames) {
+    usernames_[i] = viewers_usernames[i][0]
+  }
+  return usernames_
+}
+
 
 
 
@@ -105,5 +119,6 @@ module.exports = {
     get_user,
   get_file,
   get_owner_one_file,
-    get_all_usernames
+  get_all_usernames,
+    get_current_viewers
 }

@@ -117,13 +117,18 @@ form.is-readonly .btn-cancel {
                 </tr>
               </thead>
               <tbody id="myTable_current">
-                <% if(file[0].viewers.length!=0){ var i=1; file[0].viewers.forEach(function(username){ %>
+                <% if(currentViewers.length!=0){ var i=1; currentViewers.forEach(function(viewer){ %>
                   <tr>
                     <td>
-                      <%=username%>
+                      <%=viewer.username%>
                     </td>
-                    <td><a class="btn btn-sm btn-danger m-0"
-                        href="/users/view/?file=<%=//files.file_id%>&type=<%=//files.type%>">X</a></td>
+                    <td> <form action="/editFile_removeViewer" method="POST">
+                      <input type="hidden" value="<%= viewer.id  %>" name="username_id">
+                      <input type="hidden" value="<%= file[0].file_id %>" name="file_id">
+                      <button type="submit" class="btn btn-danger">X</button>
+                    </form>
+
+                    </td>
                   </tr>
                   <% i++; }) %>
                     <% } else{ %>
@@ -163,8 +168,13 @@ form.is-readonly .btn-cancel {
                       <td>
                         <%=username.username%>
                       </td>
-                      <td><a class="btn btn-sm btn-success m-0"
-                          href="/editFile/add_viewer?username_id=<%=username.id%>&file_id=<%= file[0].file_id %>">&#10004;</a></td>
+                      <td> <form action="/editFile_addViewer" method="POST">
+                        <input type="hidden" value="<%= username.id  %>" name="username_id">
+                        <input type="hidden" value="<%= file[0].file_id %>" name="file_id">
+                        <button type="submit" class="btn btn-success">&#10004;</button>
+                      </form> 
+                       
+                      </td>
                     </tr>
                     <% i++; }) %>
                       <% } else{ %>

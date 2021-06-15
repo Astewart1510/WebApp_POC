@@ -427,14 +427,14 @@ app.post("/submit", async (req, res) => {
 app.post("/editFile_name", async (req, res) => {
     if (req.isAuthenticated()) {
       console.log(req.body);
-       FileRights.updateOne({ file_id: req.body.fileId}, {$set: {name: req.body.fileName}}, function(err, res) { 
+      await FileRights.updateOne({ file_id: req.body.fileId}, {$set: {name: req.body.fileName}}, function(err, res) { 
          if (err) throw err;
          console.log("1 filename updated");
        });
       let newfile = await myquery.get_file(req.body.fileId);
       let usernames = await myquery.get_all_usernames();
-
-      res.render("edit_file", {file: newfile, usernames: usernames});
+      let currentViewers = await myquery.get_current_viewers(newfile[0].viewers);
+      res.render("edit_file", {file: newfile, usernames: usernames, currentViewers: currentViewers});
     } else {
       res.redirect("/login");
     }
@@ -451,7 +451,8 @@ app.post("/editFile", async (req, res) =>{
       if (file[0].owner == req.user.id) {
         console.log("yes its the correct owner");
         let usernames = await myquery.get_all_usernames();
-        res.render("edit_file", {file: file, usernames: usernames});
+        let currentViewers = await myquery.get_current_viewers(file[0].viewers);
+        res.render("edit_file", {file: file, usernames: usernames, currentViewers: currentViewers});
       }
     }
   } else {
@@ -459,60 +460,62 @@ app.post("/editFile", async (req, res) =>{
   }
 })
 
-app.get("/editFile/add_viewer", async (req, res) => {
-   //if (req.isAuthenticated()) {
-     console.log(req.query);
-  let viewer = mongodb.ObjectID(req.query.username_id);
-  console.log(viewer)
-  let newfile = await myquery.get_file(req.query.file_id);
-  let match = newfile[0].viewers.includes(viewer);
-  console.log(match);
-  // for (let i of newfile[0].viewers) {
-  //   if (i != viewer) {
-  //     console.log("this can be added")
-  //   } else {
-  //     console.log("this user already exits")
-  //   }
-  // }
-  console.log(newfile[0].viewers);
-    //let exits = await FileRights.findOne({ file_id: req.query.file_id }, { $where: t })
-    //  let exits = await FileRights.find( { $and: [ { file_id: req.query.file_id }, { viewer: viewer} ] } )
-    //   console.log(exits)
-      //  FileRights.updateOne({ file_id: req.query.file_id}, {$push: {name: viewer}}, function(err, res) { 
-      //    if (err) throw err;
-      //    console.log("1 viewer inserted");
-      //  });
-      // let usernames = await myquery.get_all_usernames();
+app.post("/editFile_addViewer", async (req, res) => {
+    if (req.isAuthenticated()) {
+       console.log(req.body);
+       let viewer = req.body.username_id
+       let newfile = await myquery.get_file(req.body.file_id);
 
-    //   res.render("edit_file", {file: newfile, usernames: usernames});
-    // } else {
-    //   res.redirect("/login");
-    // }
-  
+
+      let match = newfile[0].viewers.includes(viewer);
+      if (!match) { // addd new user
+           console.log("not a match");
+           viewer_to_add = mongodb.ObjectID(req.body.username_id);
+          FileRights.updateOne({ file_id: req.body.file_id }, { $push: { viewers: viewer_to_add } }, function (err, res) {
+              if (err) throw err;
+            console.log("1 viewer inserted");
+               });
+          } else {  
+          console.log("is a match") }// already added user
+      let updatedfile = await myquery.get_file(req.body.file_id);
+      let usernames = await myquery.get_all_usernames();
+      let currentViewers = await myquery.get_current_viewers(updatedfile[0].viewers);
+      res.render("edit_file", {file: updatedfile, usernames: usernames, currentViewers: currentViewers});
+    } else {
+      res.redirect("/login");
+    }
 });
 
-// app.post("/users/edit_file", async (req, res) =>{
-//   if (req.isAuthenticated()) {
-//     console.log(req.body.bookId);
-//     const match = await bcrypt.compare(req.body.passcode, req.user.passcode);
-//     if (match) {
-//       console.log("yebo, correct pincode and correct user");
-//       let file = await myquery.get_file(req.body.bookId);
-//       console.log(file);
-//       let file_owner = await myquery.get_owner_one_file(req.user.id, req.body.bookId);
-//       if (file_owner == req.user.id) {
-//         console.log(file_owner)
-//         //get usernames to select
-//         let usernames = await myquery.get_all_usernames();
-        
-//         console.log(file)
-//     res.render("edit_file");
-//       };
-//     }
-//   } else {
-//     res.redirect("/login");
-//   }
-// });
+app.post("/editFile_removeViewer", async (req, res) => {
+    if (req.isAuthenticated()) {
+       console.log(req.body);
+      let viewer_id = req.body.username_id
+      let file = await myquery.get_file(req.body.file_id);
+
+      viewer_to_remove = mongodb.ObjectID(req.body.username_id);
+      FileRights.updateOne({ file_id: req.body.file_id }, { $pull: { viewers: viewer_to_remove } }, function (err, res) {
+              if (err) throw err;
+            console.log("1 viewer remove");
+               });
+
+      // let match = newfile[0].viewers.includes(viewer);
+      // if (!match) { // addd new user
+      //      console.log("not a match");
+           
+      //     } else {  
+      //     console.log("is a match") }// already added user
+      let updatedfile = await myquery.get_file(req.body.file_id);
+      let usernames = await myquery.get_all_usernames();
+      let currentViewers = await myquery.get_current_viewers(updatedfile[0].viewers);
+      res.render("edit_file", {file: updatedfile, usernames: usernames, currentViewers: currentViewers});
+    } else {
+      res.redirect("/login");
+    }
+});
+
+
+
+
 
 // change to post later on
 app.get("/seal_data", function (req, res) {
