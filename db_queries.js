@@ -86,8 +86,17 @@ async function get_owner_one_file(owner_id, file_id) {
   return file_owner_id[0].owner
 }
 
-async function get_all_usernames() {
+async function get_all_user_usernames() {
   let usernames = await User.find({ group: 'user' }, { username: 1 });
+  // usernames_ = [];
+  // for (i in usernames) {
+  //   usernames_[i] = usernames[i]["username", "_id"]
+  // }
+  return usernames
+}
+
+async function get_all_doc_usernames() {
+  let usernames = await User.find({ group: 'doctor' }, { username: 1 });
   // usernames_ = [];
   // for (i in usernames) {
   //   usernames_[i] = usernames[i]["username", "_id"]
@@ -119,6 +128,7 @@ module.exports = {
     get_user,
   get_file,
   get_owner_one_file,
-  get_all_usernames,
-    get_current_viewers
+  get_all_user_usernames,
+  get_all_doc_usernames,
+  get_current_viewers
 }

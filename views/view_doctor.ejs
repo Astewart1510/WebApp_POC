@@ -1,0 +1,190 @@
+<%- include('partials/header_logged_in') %>
+<style>
+.tableFixHead          { overflow: auto; height: 150px; }
+.tableFixHead thead th { position: sticky; top: 0; z-index: 1; }
+
+/* Just common table stuff. Really. */
+table  { border-collapse: collapse; width: 100%; }
+th, td { padding: 8px 16px; }
+th     { background:rgb(254, 254, 255); 
+border-bottom: 1px solid rgb(0, 0, 0);}
+
+
+  #partitioned {
+    padding-left: 15px;
+    letter-spacing: 42px;
+    border: 0;
+    background-image: linear-gradient(to left, black 70%, rgba(92, 83, 83, 0) 0%);
+    background-position: bottom;
+    background-size: 50px 1px;
+    background-repeat: repeat-x;
+    background-position-x: 35px;
+    width: 220px;
+    min-width: 220px;
+    /* outline: none; */
+  }
+
+  #divInner {
+    left: 0;
+    position: sticky;
+  }
+
+  #divOuter {
+    width: 190px;
+    overflow: hidden;
+  }
+
+ #check:checked {
+    background-color:green;
+    visibility:visible;
+ }
+  #check {
+    visibility: hidden;
+ }
+</style>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Popper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
+    <section class="section_top">
+        <div class="jumbotron text-center">
+            <div class="container">
+                <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                    View
+                </button> -->
+                
+                <div class="row" style="padding-bottom: 15px">
+                    <div class="col-lg-2">
+                    <i class="far fa-user-circle fa-5x"></i>                    
+                    </div>
+                    <div class="col-lg-8">
+                        <h2 class="display-5">Patient Files</h2>
+                        <h5>The files listed below are available for your use only. The patient has given their consent to view their file.</h5>
+                    </div>
+                </div>
+
+                <input class="form-control" id="myInput" type="text" placeholder="Search..">
+                <br>
+                
+                <div class="tableFixHead" style="height: 270px;overflow: scroll;">
+                    <table class="table table-hover tableFixHead" >
+                        <thead class="table-light" >
+                        <tr>
+                            <th scope="col">Patient Username</th>
+                            <th scope="col">File Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">View</th>
+                        </tr>
+                        </thead>
+                        <tbody id="myTable" >
+                        <% if(userData.length!=0){ var i=1; userData.forEach(function(files){ %>
+                            <tr>
+                                <td>
+                                    <%=i; %>
+                                </td>
+                                <td>
+                                    <%=files.name %>
+                                </td>
+                                <td>
+                                    <%=files.type %>
+                                </td>
+                                <td>
+                                        
+                                     <%=files.viewers.length%> 
+                                    
+                                </td>
+                                
+                                <td><a data-toggle="modal" data-id=<%=files.file_id%> class="open-AddBookDialog btn btn-sm btn-primary" href="#myModal">Edit</a></td>
+                                <td><a  class="btn btn-sm btn-success m-0" href="/users/view/?file=<%=files.file_id%>&type=<%=files.type%>">View</a></td>
+                            </tr>
+                            <% i++; }) %>
+                                <% } else{ %>
+                                    <tr>
+                                        <td colspan="7">No Data Found</td>
+                                    </tr>
+                                    <% } %>
+                    <!-- data-target="#myModal" -->
+                                </tbody>
+                    </table>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+    </div>
+
+
+<!-- The Modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            
+            <div class="modal-header">
+                <h4 class="modal-title">Enter your unique 4 digit passcode...</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+
+            <div class="modal-body">
+                <form method="POST" action="/editFile">
+                    <div class="form-group form-inline justify-content-center">
+                    <div id="divOuter">
+                        <div id="divInner">
+                            <input id="partitioned" type="password" maxlength="4" name="passcode"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
+                                onKeyPress="if(this.value.length==4) return false;" />
+                        </div>
+                    </div>
+                    </div>
+                    <div style=" display: none;" class="form-group form-inline justify-content-center">
+                            <input type="text" name="bookId" id="bookId" value="" />
+                    </div>
+
+                    <div class="form-group form-inline justify-content-end">
+                        <div class="modal-footer"></div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        $(document).ready(function () {
+            $("#myInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#myTable tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+        $(document).on("click", ".open-AddBookDialog", function () {
+                var myBookId = $(this).data('id');
+                $(".modal-body #bookId").val(myBookId);
+                // As pointed out in comments, 
+                // it is unnecessary to have to manually call the modal.
+                // $('#addBookDialog').modal('show');
+            });
+        
+    </script>
+
+
+    <%- include('partials/footer') %>
+
+
+ 
