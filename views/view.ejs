@@ -56,8 +56,8 @@ border-bottom: 1px solid rgb(0, 0, 0);}
 
 
 
-    <section class="section_top">
-        <div class="jumbotron text-center">
+    <div class="jumbotron centered submit_top">
+        <div style="padding: 1rem 2rem 4rem 2rem;" class="jumbotron text-center">
             <div class="container">
                 <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                     View
@@ -69,6 +69,8 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                     </div>
                     <div class="col-lg-8">
                         <h2 class="display-5">Your uploaded files</h2>
+                        <h5>The files listed below are your personal files that you uploaded through the submit portal. You are required to enter your unique 4 digit pin to edit the file.</h5>
+
                     </div>
                 </div>
 
@@ -119,10 +121,61 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                     </table>
                 </div>
                 
+                <hr>
+                <br>
+                <div class="row" style="padding-bottom: 15px">
+                    <div class="col-lg-2">
+                        <i class="fas fa-file-medical fa-5x"></i>                    </div>
+                    <div class="col-lg-8">
+                        <h2 class="display-5">Files shared with you</h2>
+                        <h5>The files listed below are available for your use only. The user has given their consent for you to view their file.</h5>
+                    </div>
+                </div>
+                
+                <input class="form-control" id="myInput-shared" type="text" placeholder="Search..">
+                <br>
+                
+                <div class="tableFixHead" style="height: 270px;overflow: scroll;">
+                    <table class="table table-hover tableFixHead">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Username</th>
+                                <th scope="col">File Name</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myTable-shared">
+                            <% if(files_to_view.length!=0){ var i=1; files_to_view.forEach(function(files){ %>
+                                <tr>
+                                    <td>
+                                        <%=files.owner; %>
+                                    </td>
+                                    <td>
+                                        <%=files.name %>
+                                    </td>
+                                    <td>
+                                        <%=files.type %>
+                                    </td>
+                                    <td><a class="btn btn-sm btn-success m-0"
+                                            href="/users/view/?file=<%=files.file_id%>&type=<%=files.type%>">View</a></td>
+                                </tr>
+                                <% i++; }) %>
+                                    <% } else{ %>
+                                        <tr>
+                                            <td colspan="7">No Data Found</td>
+                                        </tr>
+                                        <% } %>
+                                            <!-- data-target="#myModal" -->
+                        </tbody>
+                    </table>
+                </div>
+
+                
             </div>
         </div>
     </section>
-    </div>
+    <!-- </div> -->
 
 
 <!-- The Modal -->
@@ -174,6 +227,14 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                 });
             });
         });
+         $(document).ready(function () {
+                $("#myInput-shared").on("keyup", function () {
+                    var value = $(this).val().toLowerCase();
+                    $("#myTable-shared tr").filter(function () {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
         $(document).on("click", ".open-AddBookDialog", function () {
                 var myBookId = $(this).data('id');
                 $(".modal-body #bookId").val(myBookId);

@@ -6,6 +6,11 @@
   <div class="row">
     <div class="col-md-4">
       <h1>Doctor Login</h1>
+      <% if (message.length> 0) { %>
+        <div class="alert alert-danger">
+          <%= message %>
+        </div>
+        <% } %>
     </div>
     <div class="col-md-4">
       <a href="/register_doctor" class="btn btn-success">

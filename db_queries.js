@@ -118,6 +118,25 @@ async function get_current_viewers(viewers) {
   return usernames_
 }
 
+async function get_user_username(username_ids) {
+  let user = await User.find({ _id: { $in: [username_ids]} }, { _id: 0, username: 1 }); //username: 1, firstName: 1, LastName: 1, mobile: 1, salt: 0, hash: 0,
+  let userData = JSON.parse(JSON.stringify(user))
+  return userData[0].username
+  
+}
+
+async function get_viewing_files(user_id) {
+  let files_to_view = await FileRights.find({ "viewers": user_id }, { _id: 0, viewers: 0 });
+  let files = JSON.parse(JSON.stringify(files_to_view));
+  for (i in files) {
+    let username_id = files[i].owner;
+    let username = await get_user_username(username_id);
+    files[i].owner = username;
+  }
+  return files
+  
+}
+
 
 
 
@@ -130,5 +149,6 @@ module.exports = {
   get_owner_one_file,
   get_all_user_usernames,
   get_all_doc_usernames,
-  get_current_viewers
+  get_current_viewers,
+  get_viewing_files
 }

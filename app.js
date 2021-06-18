@@ -103,12 +103,14 @@ app.get("/", function (req, res) {
   }
 });
 
-app.get("/login", function(req, res){
-  res.render("login");
+app.get("/login", function (req, res) {
+  message = [];
+  res.render("login", {message: message});
 });
 
-app.get("/login_doctor", function(req, res){
-  res.render("login_doctor");
+app.get("/login_doctor", function (req, res) {
+  message = [];
+  res.render("login_doctor", {message: message});
 });
 
 app.get("/logout", function(req, res){
@@ -171,7 +173,11 @@ app.get("/view", async (req, res) =>{
     console.log(success);
     let files = await myquery.get_owner_files(req.user.id);
     console.log(files);
-    res.render("view",{ userData: files , success: success});
+    user_id = mongodb.ObjectId(req.user.id);
+    let files_to_view = await myquery.get_viewing_files(user_id)
+    console.log(files_to_view);
+
+    res.render("view",{ userData: files , success: success, files_to_view: files_to_view});
   } else {
     res.redirect("/login");
   }
@@ -188,11 +194,6 @@ app.get("/submit", function(req, res){
 
 app.get("/users/view/", async (req, res) => {
   if (req.isAuthenticated()) {
-    console.log(req.query.file);
-    console.log(req.query.type)
-
-    const awe = await bcrypt.compare('1234', '$2b$14$HRgSU3OdNjmPhjgqLUntmeiBUo./GOE9R0EOcCB0ekdD22XS3urBe')
-    console.log(awe);
  
     let bucket = new mongodb.GridFSBucket(db, {
       bucketName: 'UserFiles' 
@@ -273,7 +274,7 @@ app.post("/register_doctor", async (req, res) =>  {
 });
 
 // login routes
-app.post("/login", function(req, res){
+app.post("/login", function(req, res, next){
 
   const user = new User({
     username: req.body.username,
@@ -283,10 +284,25 @@ app.post("/login", function(req, res){
   req.login(user, function(err){
     if (err) {
       console.log(err);
+      message = "Your password or username is incorrect";
+      res.render("login", { message: message });
     } else {
-      passport.authenticate("local")(req, res, function(){
-        res.redirect("/secrets");
-      });
+      // passport.authenticate("local", {})(req, res, function(){
+      //   res.redirect("/secrets");
+      //});
+       passport.authenticate('local', function(err, user, info) {
+    if (err) { return next(err); }
+         if (!user) {
+           message = "Your password or username is incorrect";
+           return res.render('login',{ message: message });
+         }
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
+      }
+      return res.redirect('/secrets');
+    });
+  })(req, res, next);
     }
   });
 
@@ -302,12 +318,22 @@ app.post("/login_doctor", function(req, res){
   req.login(Doctor, function(err){
     if (err) {
       console.log(err);
+      message = "Your password or username is incorrect";
+      res.render("login", { message: message });
     } else {
-      console.log(User);
-      passport.authenticate("local")(req, res, function () {
-        console.log("Successful login of doctor");
-        res.redirect("/secrets");
-      });
+      passport.authenticate('local', function(err, user, info) {
+    if (err) { return next(err); }
+         if (!user) {
+           message = "Your password or username is incorrect";
+           return res.render('login',{ message: message });
+         }
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
+      }
+      return res.redirect('/secrets');
+    });
+  })(req, res, next);
     }
   });
 
