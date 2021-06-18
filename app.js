@@ -343,20 +343,22 @@ app.post("/login_doctor", function(req, res){
 
 app.post("/user/update", async (req, res) => {
   if (req.isAuthenticated()) {
-
+    var user_info;
     if (req.user.group == "doctor") {
-      const user_info = ({
+       user_info = ({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         mobile: req.body.mobile,
         hospital: req.body.hospital
       });
+
     } else if (req.user.group == "user") {
-      const user_info = ({
+      var user_info = ({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         mobile: req.body.mobile
       });
+
     }
   user_info_sealed_encrypted_string = await encrypt_seal_PII(user_info);
 
