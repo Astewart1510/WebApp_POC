@@ -557,10 +557,6 @@ app.post("/editFile_removeViewer", async (req, res) => {
     }
 });
 
-
-
-
-
 // change to post later on
 app.get("/seal_data", function (req, res) {
   // test   
@@ -633,7 +629,12 @@ app.get("/axios_test", async (req, res) => {
 });
 
 
-app.listen(3000, function() {
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
+app.listen(port, function () {
   console.log("Server started on port 3000.");
 });
 
