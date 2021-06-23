@@ -5,11 +5,12 @@ const MongoClient = mongodb.MongoClient;
 
 let db;
 
-MongoClient.connect('mongodb://localhost', { useNewUrlParser: true, useUnifiedTopology: true }, (err, database) => {
+MongoClient.connect('mongodb+srv://test-user:Test123@cluster0.sj7dd.mongodb.net/thesisPOC?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }, (err, database) => {
   if (err) {
     console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
     process.exit(1);
   }
+  console.log("connected to mongo atlas db_queries")
   db = database.db('thesisPOC');
 });
 
