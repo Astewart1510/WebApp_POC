@@ -65,7 +65,13 @@ app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 // connect to mongodb locally
 //const connection = mongoose.connect("mongodb://localhost:27017/thesisPOC", {useNewUrlParser: true, useUnifiedTopology: true });
 //connect to mongodb cluster
-const connection = mongoose.connect("mongodb+srv://test-user:Test123@cluster0.sj7dd.mongodb.net/thesisPOC?retryWrites=true&w=majority", {useNewUrlParser: true, useUnifiedTopology: true });
+const connection = mongoose.connect("mongodb+srv://test-user:Test123@cluster0.sj7dd.mongodb.net/thesisPOC?retryWrites=true&w=majority", {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true,
+        useFindAndModify: false }).then(() => {
+        console.log('Database connected successfully!');
+      })
+      .catch((err) => {
+        console.log('Error connecting with error code:', err);
+      });
 
 mongoose.set("useCreateIndex", true);
 // set up passport on the User schema
