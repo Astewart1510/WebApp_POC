@@ -68,6 +68,16 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                     <i class="far fa-user-circle fa-5x"></i>                    
                     </div>
                     <div class="col-lg-8">
+                        <% if (message_deleted == 1) { %>
+                            <div class="alert alert-danger">
+                                <%= message %>
+                            </div>
+                            <% } %>
+                        <% if (message_upload == 1) { %>
+                            <div class="alert alert-success">
+                                <%= message %>
+                            </div>
+                            <% } %>
                         <h2 class="display-5">Your uploaded files</h2>
                         <h5>The files listed below are your personal files that you uploaded through the submit portal. You are required to enter your unique 4 digit pin to edit the file.</h5>
 
@@ -242,6 +252,12 @@ border-bottom: 1px solid rgb(0, 0, 0);}
                 // it is unnecessary to have to manually call the modal.
                 // $('#addBookDialog').modal('show');
             });
+            $(document).ready(function () {
+                    // show the alert
+                    setTimeout(function () {
+                        $(".alert").alert('close');
+                    }, 4000);
+                });
         
     </script>
 

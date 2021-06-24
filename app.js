@@ -99,7 +99,6 @@ MongoClient.connect('mongodb+srv://test-user:Test123@cluster0.sj7dd.mongodb.net/
     console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
     process.exit(1);
   }
-  console.log("connected to mongo atlas app.js")
   db = database.db('thesisPOC');
 });
 
@@ -178,15 +177,24 @@ app.get("/secrets", async (req, res) => {
 app.get("/view", async (req, res) =>{
   if (req.isAuthenticated()) {
     console.log(req.user);
-    var success = req.query.upload;
-    console.log(success);
+   
     let files = await myquery.get_owner_files(req.user.id);
     console.log(files);
     user_id = mongodb.ObjectId(req.user.id);
     let files_to_view = await myquery.get_viewing_files(user_id)
     console.log(files_to_view);
-
-    res.render("view",{ userData: files , success: success, files_to_view: files_to_view});
+   
+    var message_deleted= [] ;
+    var message_upload = [];
+    var message;
+    if (req.query.delete == 1) {
+      message_deleted = 1;
+      message = "File successfully deleted!";
+    } else if (req.query.upload == 1) {
+      message_upload = 1;
+      message = "File successfully uploaded!"
+    }
+    res.render("view",{ userData: files , message_deleted: message_deleted, message_upload: message_upload, files_to_view: files_to_view, message: message});
   } else {
     res.redirect("/login");
   }
@@ -463,8 +471,8 @@ app.post("/submit", async (req, res) => {
                 return res.status(500).json({ message: "Error uploading file" });
               });
               uploadStream.on('finish', () => {
-                var upload = encodeURIComponent('1')
-                return res.redirect("/view?upload=" + upload);
+               let upload = 1;
+                res.redirect("/view?upload=" + upload);
               });
                 
     
@@ -479,6 +487,25 @@ app.post("/submit", async (req, res) => {
     res.redirect("/login")
   }
 });
+
+app.post("/delete_file", async (req, res) => {
+  if (req.isAuthenticated()) {
+    console.log(req.body.file_id);
+    const file_id = new mongoose.Types.ObjectId(req.body.file_id);
+    let bucket = new mongodb.GridFSBucket(db, {
+                bucketName: 'UserFiles'
+    });
+    bucket.delete(file_id);
+    await FileRights.deleteOne({ file_id: file_id });
+    
+    let deleted = 1;
+    res.redirect("/view?delete=" + deleted);
+  } else {
+    res.redirect("/login");
+
+  }
+});
+
 
 app.post("/editFile_name", async (req, res) => {
     if (req.isAuthenticated()) {

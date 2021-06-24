@@ -10,7 +10,6 @@ MongoClient.connect('mongodb+srv://test-user:Test123@cluster0.sj7dd.mongodb.net/
     console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
     process.exit(1);
   }
-  console.log("connected to mongo atlas db_queries")
   db = database.db('thesisPOC');
 });
 
@@ -138,7 +137,13 @@ async function get_viewing_files(user_id) {
   
 }
 
-
+//delete file 
+async function delete_owner_file(file_id) {
+  //must delete from file rights and from userfile
+  await FileRights.deleteOne({ file_id: file_id });
+  console.log("file deleted from fileRights")
+  
+}
 
 
 module.exports = {
