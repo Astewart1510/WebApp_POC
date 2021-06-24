@@ -15,7 +15,7 @@ const fileUpload = require("express-fileupload");
 const CryptoJS = require('crypto-js');
 const byteSize = require('byte-size');
 const bcrypt = require("bcrypt");
-const saltRounds = process.env.SALT_ROUNDS;
+const saltRounds = 12;// can use process.env.SALT_ROUNDS;
 const fs = require('fs');
 
 // import helper files and schemas
@@ -219,7 +219,7 @@ app.get("/users/view/", async (req, res) => {
         chunks.push(Buffer.from(chunk));
       }
 
-    let buffer_2 = await decrypt_unseal_file(chunks, process.env.SERVER_SECRET)
+    let buffer_2 = await decrypt_unseal_file(chunks, "7OOLrGhqBgWoO1XBVBXhGO8q") // can user process.env.SERVER_SECRET when running in isolation
     console.log("this is the final image buffer", buffer_2);
       
     res.contentType(req.query.type);
@@ -431,7 +431,7 @@ app.post("/submit", async (req, res) => {
             if (match) {
               console.log("correct passcode");
               console.log("password is correct and uploading file")
-              let key = crypto.createHash("sha256").update(process.env.SERVER_SECRET).digest("hex");
+              let key = crypto.createHash("sha256").update("7OOLrGhqBgWoO1XBVBXhGO8q").digest("hex");
               console.log("original file buffer before anything", req.file.buffer)
               let encrypted_bytes = myencrypt.encrypt_aes(req.file.buffer, key);
      
@@ -712,7 +712,7 @@ app.listen(port, function () {
 
 
 async function encrypt_seal_PII(user_info) {
-  let key = crypto.createHash("sha256").update(process.env.SERVER_SECRET).digest("hex");
+  let key = crypto.createHash("sha256").update("7OOLrGhqBgWoO1XBVBXhGO8q").digest("hex");
   json_stringify_user = JSON.stringify(user_info)
   console.log("json_stringify_user",json_stringify_user);
   //2. convert to buf
@@ -731,7 +731,7 @@ async function encrypt_seal_PII(user_info) {
 }
 
 async function decrypt_unseal_PII(user_info_sealed_encrypted_string) {
-  let key = crypto.createHash("sha256").update(process.env.SERVER_SECRET).digest("hex");
+  let key = crypto.createHash("sha256").update("7OOLrGhqBgWoO1XBVBXhGO8q").digest("hex");
   //convert from string back to JSON data in yellow
   let parse = JSON.parse(user_info_sealed_encrypted_string);
   console.log("parse", parse); // now its in yellow

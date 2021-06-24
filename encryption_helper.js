@@ -6,16 +6,16 @@ function encrypt_aes(unencrypted_bytes, user_key) {
   let key = new Buffer.from(user_key, 'hex');         
   //console.log("key, ", key)
                 
-  let iv = new Buffer.from(process.env.AES_IV, 'hex');              
+  let iv = new Buffer.from('000000000000', 'hex'); //can use process.env.AES_IV             
   //console.log("iv", iv)
                 
   let bytes = new Buffer.from(unencrypted_bytes);             
   console.log("plaintext", bytes);
                 
-  let aad = new Buffer.from(process.env.AES_AAD);             
+  let aad = new Buffer.from('0'); // can use process.env.AES_AAD          
   //console.log("aad", aad);
                 
-  let auth_tag = new Buffer.from(process.env.AES_AUTH_TAG);
+  let auth_tag = new Buffer.from('0000000000000000'); // can use process.env.AES_AUTH_TAG
   //console.log("auth_tag", auth_tag);
   
   encrypted = gcm.encrypt(key, iv, bytes, auth_tag)       
@@ -33,16 +33,16 @@ function decrypt_aes(encrypted_bytes, user_key) {
   let key = new Buffer.from(user_key, 'hex');         
   //console.log("key, ", key)
                 
-  let iv = new Buffer.from(process.env.AES_IV, 'hex');              
+  let iv = new Buffer.from('000000000000', 'hex'); //can use process.env.AES_IV             
   //console.log("iv", iv)
                 
   let ciphertext = new Buffer.from(encrypted_bytes);             
   console.log("buffer encrypted (ciphertext)", ciphertext);
                 
-  let aad = new Buffer.from(process.env.AES_AAD);             
+  let aad = new Buffer.from('0'); // can use process.env.AES_AAD          
   //console.log("aad", aad);
                 
-  let auth_tag = new Buffer.from(process.env.AES_AUTH_TAG);
+  let auth_tag = new Buffer.from('0000000000000000'); // can use process.env.AES_AUTH_TAG
   //console.log("auth_tag", auth_tag);
   
   decrypted = gcm.decrypt(key, iv, ciphertext, aad, auth_tag);
