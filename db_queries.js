@@ -2,6 +2,7 @@ const mongodb = require('mongodb');
 const User = require('./schemas.js').User;
 const FileRights = require('./schemas.js').FileRights;
 const MongoClient = mongodb.MongoClient;
+const mongoose = require("mongoose");
 
 let db;
 
@@ -46,25 +47,12 @@ async function get_owner_files_ids(owner_id) {
 async function get_owner_files(owner_id) {
   let files = await FileRights.find({ owner: owner_id}, { _id: 0 });
   let files_ = JSON.parse(JSON.stringify(files));
-//   file_ids = [];
-//   for (i in files_) {
-//     file_ids[i] = (files_[i]["file_id"])
-//   }
+
   return files_
 }
 
-// async function get_viewing_files(uer_id) {
-// let files = await FileRights.find({ owner: user_id}, { file_id: 1, _id: 0 });
-//   let files_ = JSON.parse(JSON.stringify(files));
-//   file_ids = [];
-//   for (i in files_) {
-//     file_ids[i] = (files_[i]["file_id"])
-//   }
-//   return file_ids
-// }
-
 async function get_user(user_id) {
-  let user = await User.find({ _id: user_id }, { _id: 0 }); //username: 1, firstName: 1, LastName: 1, mobile: 1, salt: 0, hash: 0,
+  let user = await User.find({ _id: user_id }, { _id: 0 }); 
   let userData = JSON.parse(JSON.stringify(user))
   return userData
   
@@ -88,19 +76,11 @@ async function get_owner_one_file(owner_id, file_id) {
 
 async function get_all_user_usernames() {
   let usernames = await User.find({ group: 'user' }, { username: 1 });
-  // usernames_ = [];
-  // for (i in usernames) {
-  //   usernames_[i] = usernames[i]["username", "_id"]
-  // }
   return usernames
 }
 
 async function get_all_doc_usernames() {
   let usernames = await User.find({ group: 'doctor' }, { username: 1 });
-  // usernames_ = [];
-  // for (i in usernames) {
-  //   usernames_[i] = usernames[i]["username", "_id"]
-  // }
   return usernames
 }
 
@@ -119,6 +99,7 @@ async function get_current_viewers(viewers) {
 }
 
 async function get_user_username(username_ids) {
+  console.log(username_ids);
   let user = await User.find({ _id: { $in: [username_ids]} }, { _id: 0, username: 1 }); //username: 1, firstName: 1, LastName: 1, mobile: 1, salt: 0, hash: 0,
   let userData = JSON.parse(JSON.stringify(user))
   return userData[0].username
@@ -137,14 +118,23 @@ async function get_viewing_files(user_id) {
   
 }
 
-//delete file 
-async function delete_owner_file(file_id) {
-  //must delete from file rights and from userfile
-  await FileRights.deleteOne({ file_id: file_id });
-  console.log("file deleted from fileRights")
-  
+async function remove_viewer_from_all_files(user_id) {
+  // get all ids of files that can view
+  let files_to_view = await FileRights.find({ "viewers": user_id }, { _id: 0, file_id: 1 });
+  console.log(files_to_view);
+  let file_ids = await JSON.parse(JSON.stringify(files_to_view));
+  console.log(file_ids);
+  let file_ids_ = [];
+  for (i in file_ids) {
+    file_ids_[i] = file_ids[i].file_id;
+  }
+  console.log(file_ids_);
+  await FileRights.updateMany({ "file_id": { $in: file_ids_ } },
+  {
+   $pull: { "viewers": user_id } 
+  }
+  );
 }
-
 
 module.exports = {
     get_file_buffer,
@@ -156,5 +146,6 @@ module.exports = {
   get_all_user_usernames,
   get_all_doc_usernames,
   get_current_viewers,
-  get_viewing_files
+  get_viewing_files,
+  remove_viewer_from_all_files
 }

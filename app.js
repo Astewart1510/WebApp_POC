@@ -495,7 +495,9 @@ app.post("/delete_file", async (req, res) => {
     let bucket = new mongodb.GridFSBucket(db, {
                 bucketName: 'UserFiles'
     });
+    // delete from gridfs 
     bucket.delete(file_id);
+    // delete from user file
     await FileRights.deleteOne({ file_id: file_id });
     
     let deleted = 1;
@@ -505,6 +507,43 @@ app.post("/delete_file", async (req, res) => {
 
   }
 });
+
+app.post("/delete_user", async (req, res) => {
+  if (req.isAuthenticated()) {
+    let match = await bcrypt.compare(req.body.passcode, req.user.passcode);
+    if (match) {
+      console.log("yebo, correct pincode and correct user");
+      //first get all the file_ids of the owner and delete in the gridfs system
+      let file_ids = await myquery.get_owner_files_ids(req.user.id);
+      let bucket = new mongodb.GridFSBucket(db, {
+                bucketName: 'UserFiles'
+      });
+      console.log(file_ids);
+      for await (let i of file_ids) {
+        let file = mongoose.Types.ObjectId(i);
+        bucket.delete(file)
+      }
+      //delete all files associated with this user
+      await FileRights.deleteMany({ owner: mongoose.Types.ObjectId(req.user.id) });
+      
+      //remove user as viewer in all viewing arrays of files
+      let user_id = mongoose.Types.ObjectId(req.user.id)
+      await myquery.remove_viewer_from_all_files(user_id);
+
+      // finally remove user
+      await User.deleteOne({ _id: req.user.id });
+      
+      res.redirect("/");
+    }
+    
+  
+    } else {
+    res.redirect("/login");
+
+  }
+
+});
+  
 
 
 app.post("/editFile_name", async (req, res) => {
