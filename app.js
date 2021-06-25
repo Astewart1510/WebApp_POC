@@ -137,6 +137,8 @@ app.get("/secrets", async (req, res) => {
     let user = await myquery.get_user(req.user.id)
     let user_data = await decrypt_unseal_PII(user[0].user_data);
     let files = await myquery.get_owner_files(req.user.id);
+    let user_id = mongodb.ObjectId(req.user.id);
+    let files_to_view = await myquery.get_viewing_files(user_id);
 
     if (req.user.group == "doctor") {
       console.log("this oak is a doctor");
@@ -151,7 +153,7 @@ app.get("/secrets", async (req, res) => {
 
       console.log("userinfo", user_info);
 
-      res.render("secrets_doctor", { userInfo: user_info, fileNo: files.length });
+      res.render("secrets_doctor", { userInfo: user_info, fileNo: files.length, filesView: files_to_view.length });
     } else if (req.user.group == "user") {
       console.log("this oak is a user");
       const user_info = ({
@@ -163,7 +165,7 @@ app.get("/secrets", async (req, res) => {
       })
 
       console.log("userinfo", user_info);
-      res.render("secrets", { userInfo: user_info, fileNo: files.length });
+      res.render("secrets", { userInfo: user_info, fileNo: files.length , filesView: files_to_view.length});
       }
     
   } else {
@@ -177,7 +179,7 @@ app.get("/view", async (req, res) =>{
    
     let files = await myquery.get_owner_files(req.user.id);
     console.log(files);
-    user_id = mongodb.ObjectId(req.user.id);
+    let user_id = mongodb.ObjectId(req.user.id);
     let files_to_view = await myquery.get_viewing_files(user_id)
     console.log(files_to_view);
    
