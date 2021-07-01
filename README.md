@@ -44,4 +44,4 @@ You will also see any lint errors in the console.
 # Notes for Runnning the Web App
 
 * The app is connected to a free mongodb cluster instance in the cloud where the data is stored. The api key to get into the cluster has only read and write access for that specific cluster. There is a free 550MB cap on the cluster storage. So if there are any storage errors or mongodb errors please make sure you are deleting unused files and user profiles after you have tried the POC. 
-* The app needs to communicate with the local hosted Intel SGX server. This server needs to be running at the same time as encrypted data and bytes are passsed back and forth.
+* The app needs to communicate with the local hosted Intel SGX server. This server needs to be running at the same time as encrypted data are passsed back and forth.
