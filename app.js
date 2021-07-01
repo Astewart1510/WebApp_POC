@@ -555,7 +555,8 @@ app.post("/editFile_name", async (req, res) => {
       let newfile = await myquery.get_file(req.body.fileId);
       let usernames = await myquery.get_all_user_usernames();
         let doc_usernames = await myquery.get_all_doc_usernames();
-        let currentViewers = await myquery.get_current_viewers(file[0].viewers);
+      let currentViewers = await myquery.get_current_viewers(newfile[0].viewers);
+      
         res.render("edit_file", {file: newfile, usernames: usernames, currentViewers: currentViewers, doc_usernames: doc_usernames});
     } else {
       res.redirect("/login");
